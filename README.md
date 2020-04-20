@@ -12,7 +12,8 @@
 ---
 
 ## Limitations
- Negative (plunge) pricing drops off the bottom of the gauge. I quite like this :)
+ - Negative (plunge) pricing drops off the bottom of the gauge. I quite like this :)
+ - I *think* I've handled the conversion from UTC to GMT correctly, but I haven't tested it thoroughly.
 
 ---
 ## Acknowledgements
