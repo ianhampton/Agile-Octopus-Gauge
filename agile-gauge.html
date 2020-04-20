@@ -1,0 +1,254 @@
+<!-- Agile Octopus - Current unit rate gauge -->
+<!-- A simple AJAX based current unit rate display -->
+<!-- Author - Ian Hampton - https://github.com/ianhampton -->
+<!-- Gauge meter built by Daniel Lazarovici - https://codepen.io/TheLaz/pen/Fgdwr -->
+<!-- Enter your tariff details further down... -->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Agile Octopus - Current Rate</title>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-latest.js"></script>
+	<link href='https://fonts.googleapis.com/css?family=Josefin+Slab' rel='stylesheet' type='text/css'>
+</head>
+<style>
+	html,body {
+		margin:0;
+		padding:0;
+	}
+	body,.dial {
+		background-color:#000;
+		overflow:hidden;
+	}
+	body {
+		zoom:150%;
+		font-family:'Josefin Slab', serif;
+	}
+	.gauge {
+		position:absolute;
+		width:500px;
+		height:500px;
+		top:30px;
+		left:50%;
+		margin-left:-250px;
+		border-radius:100%;
+		transform-origin:50% 50%;
+		-webkit-transform-origin:50% 50%;
+		-ms-transform-origin:50% 50%;
+		-webkit-transform:rotate(0deg);
+		margin-top:20px;
+	}
+	.meter {
+		margin:0;
+		padding:0;
+	}
+	.meter > li {
+		width:250px;
+		height:250px;
+		list-style-type:none;
+		position:absolute;
+		border-top-left-radius:250px;
+		border-top-right-radius:0;
+		transform-origin:100% 100%;
+		-webkit-transform-origin:100% 100%;
+		-ms-transform-origin:100% 100%;
+		transition-property:0;
+		pointer-events:none;
+	}
+	.meter .low {
+		transform:rotate(0deg);
+		-webkit-transform:rotate(0deg);
+		-moz-transform:rotate(0deg);
+		-ms-transform:rotate(0deg);
+		-o-transform:rotate(0deg);
+		z-index:8;
+		background-color:#09B84F;
+	}
+	.meter .normal {
+		transform:rotate(47deg);
+		-webkit-transform:rotate(47deg);
+		-moz-transform:rotate(47deg);
+		-ms-transform:rotate(47deg);
+		-o-transform:rotate(47deg);
+		z-index:7;
+		background-color:#FEE62A;
+	}
+	.meter .high {
+		transform:rotate(90deg);
+		-webkit-transform:rotate(90deg);
+		-moz-transform:rotate(90deg);
+		-ms-transform:rotate(90deg);
+		-o-transform:rotate(90deg);
+		z-index:6;
+		background-color:#FA0E1C;
+	}
+	.dial,.dial .inner {
+		width:470px;
+		height:470px;
+		position:relative;
+		top:10px;
+		left:5px;
+		border-radius:100%;
+		z-index:10;
+		transition-property:0;
+		transition-duration:1s;
+		transition-timing-function:ease-in-out;
+		transform:rotate(0deg);
+		-webkit-transform:rotate(0deg);
+		-moz-transform:rotate(0deg);
+		-ms-transform:rotate(0deg);
+		-o-transform:rotate(0deg);
+		border-color:purple;
+	}
+	.dial .arrow {
+		width:0;
+		height:0;
+		position:absolute;
+		top:214px;
+		left:24px;
+		border-left:5px solid transparent;
+		border-right:5px solid transparent;
+		border-bottom:32px solid #FFF;
+		-webkit-transform:rotate(-88deg);
+		-moz-transform:rotate(88deg);
+		-ms-transform:rotate(88deg);
+		-o-transform:rotate(88deg);
+	}
+	.gauge .value {
+		font-size:50px;
+		color:#fff;
+		position:absolute;
+		top:142px;
+		width:100%;
+		text-align:center;
+		z-index:11;
+	}
+	.following_rates {
+		color:#fff;
+		font-size:26px;
+		width:100%;
+		text-align:center;
+		position:absolute;
+		top:260px;
+		z-index:15;
+	}
+	.gauge .value .unit,.sub_price {
+		font-size:30px;
+	}
+</style>
+<body>
+	<div class="gauge">
+	  <ul class="meter">
+		<li class="low"></li>
+		<li class="normal"></li>
+		<li class="high"></li>
+	  </ul>
+	  <div class="dial">
+		<div class="inner">
+		  <div class="arrow">
+		  </div>
+		</div>
+	  </div>
+	  <div class="value">
+		0<span class="unit"> p/kWh</span>
+	  </div>
+	</div>
+	<div class="following_rates">
+	  <span id="next">&nbsp;</span>
+	</div>
+
+	<script>
+	/* --- UPDATE BELOW ---
+	 * Your product code and tariff code
+	 * The values for your plan can be found at - https://octopus.energy/dashboard/developer/
+	 * Pay attention to the character at the end of the tariff code, this sets the region:
+	 */
+	var product_code = "AGILE-18-02-21";
+	var tariff_code = "E-1R-" + product_code + "-E";
+
+
+	var api_url = "https://api.octopus.energy/v1/";
+
+	var dial = $(".dial .inner");
+	var gauge_value = $(".gauge .value");
+
+	function rotateDial(rates) {
+	    var deg = 0;
+	    var value = rates[0].value_inc_vat;
+
+	    // 35p is the capped price for Agile, but it seems to occur infrequently, so let's use 25p...
+	    //deg = (value * 177.5) / 35;
+	    deg = (value * 177.5) / 25;
+
+	    gauge_value.html(value + "<span class=\"unit\"> p/kWh</span>");
+
+	    dial.css({
+	        'transform': 'rotate(' + deg + 'deg)'
+	    });
+	    dial.css({
+	        '-ms-transform': 'rotate(' + deg + 'deg)'
+	    });
+	    dial.css({
+	        '-moz-transform': 'rotate(' + deg + 'deg)'
+	    });
+	    dial.css({
+	        '-o-transform': 'rotate(' + deg + 'deg)'
+	    });
+	    dial.css({
+	        '-webkit-transform': 'rotate(' + deg + 'deg)'
+	    });
+	}
+
+	$.fn.colourise = function() {
+	    return this.each(function() {
+	        var $this = $(this),
+	            number = $this.text();
+	        $this.css({
+	            color: number > 19 ? "#FA0E1C" : number < 3 ? "#09B84F" : "#FEE62A"
+	        });
+	    });
+	};
+
+	$(document).ready(function() {
+	    function getRates() {
+	        var date = new Date();
+	        var now = date.toISOString();
+	        $.ajax({
+	            url: api_url + "products/" + product_code + "/electricity-tariffs/" + tariff_code + "/standard-unit-rates/?period_from=" + now,
+	            dataType: "json",
+	            cache: false,
+	            success: function(data) {
+	                if (data.count > 5) {
+	                	window.rates = data.results.reverse();
+	                }
+	            },
+	            complete: function() {
+	                if (rates.length > 5) {
+						window.new_rates = [];
+						rates.slice(0, 5).forEach(function(rate) {
+							var valid_from = new Date(rate.valid_from);
+							var valid_from_time = valid_from.getHours() + ":" + (valid_from.getMinutes() < 10 ? '0' : '') + valid_from.getMinutes();
+							var value_inc_vat = rate.value_inc_vat.toFixed(2);
+							var new_rate = {
+								valid_from: valid_from_time,
+								value_inc_vat: value_inc_vat
+							};
+							new_rates.push(new_rate);
+						});
+						rotateDial(window.new_rates);
+						
+						var next_html = new_rates[1].valid_from + ":<span class='sub_price'>" + new_rates[1].value_inc_vat + "</span>p, ";
+						next_html += new_rates[2].valid_from + ":<span class='sub_price'>" + new_rates[2].value_inc_vat + "</span>p, ";
+						next_html += new_rates[3].valid_from + ":<span class='sub_price'>" + new_rates[3].value_inc_vat + "</span>p";
+						$("#next").html(next_html);
+						$('span.sub_price').colourise();
+	                }
+	            }
+	        });
+	    };
+	    setInterval(getRates, 30000);
+	    getRates();
+	});
+	</script>
+</body>
+</html>
