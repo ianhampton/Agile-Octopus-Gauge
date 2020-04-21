@@ -172,9 +172,8 @@
 	var dial = $(".dial .inner");
 	var gauge_value = $(".gauge .value");
 
-	function rotateDial(rates) {
+	function rotateDial(value) {
 	    var deg = 0;
-	    var value = rates[0].value_inc_vat;
 
 	    // 35p is the capped price for Agile, but it seems to occur infrequently, so let's use 25p...
 	    //deg = (value * 177.5) / 35;
@@ -235,7 +234,7 @@
 							};
 							new_rates.push(new_rate);
 						});
-						rotateDial(window.new_rates);
+						rotateDial(new_rates[0].value_inc_vat);
 						
 						var next_html = new_rates[1].valid_from + ":<span class='sub_price'>" + new_rates[1].value_inc_vat + "</span>p, ";
 						next_html += new_rates[2].valid_from + ":<span class='sub_price'>" + new_rates[2].value_inc_vat + "</span>p, ";
