@@ -158,14 +158,24 @@
 	</div>
 
 	<script>
+	
 	/* --- UPDATE BELOW ---
 	 * Your product code and tariff code
 	 * The values for your plan can be found at - https://octopus.energy/dashboard/developer/
-	 * Pay attention to the character at the end of the tariff code, this sets the region:
+	 * The final character of your tariff code is your region code.
 	 */
 	var product_code = "AGILE-18-02-21";
-	var tariff_code = "E-1R-" + product_code + "-E";
-
+	var region_code = "E";
+	
+	
+	// Get region code from a query string if set
+	var url_params = new URLSearchParams(window.location.search);
+	var url_region = url_params.get('region');
+	if (url_region !== null) {
+		region_code = url_region.toUpperCase();
+	}
+	
+	var tariff_code = "E-1R-" + product_code + "-" + region_code;
 
 	var api_url = "https://api.octopus.energy/v1/";
 
