@@ -5,6 +5,8 @@
  
  ![Example display screenshot](https://ianhampton.net/work/currentOctopusRate.png)
  
+ I've hosted a copy with customisable region here - https://hampton.org.uk/octopus/
+ 
  ---
  
 ## Installation
